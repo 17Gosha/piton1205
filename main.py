@@ -1,12 +1,10 @@
-
-
 import telebot
 # pyTelegramBotAPI	4.3.1
 from telebot import types
 import requests # Требуется для "Прислать собаку"
 import bs4 # требуется для get_anekdot()
 
-bot = telebot.TeleBot('5255331774:AAHCU3lY_SjoYPOepjMFpcLdfqK7Zz-Rk6o')  # Создаем экземпляр ботф
+bot = telebot.TeleBot('5255331774:AAHCU3lY_SjoYPOepjMFpcLdfqK7Zz-Rk6o')  # Создаем экземпляр бота
 
 # -----------------------------------------------------------------------
 
@@ -19,6 +17,14 @@ def get_messages(message):
     bot.send_message(message.chat.id, sticker)
 
 # -----------------------------------------------------------------------
+@bot.message_handler(content_types=['audio'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    audio = message.audio
+    bot.send_message(chat_id, audio)
+# -----------------------------------------------------------------------
 
 @bot.message_handler(content_types=['voice'])
 def get_messages(message):
@@ -26,12 +32,41 @@ def get_messages(message):
     bot.send_message(chat_id, "Это " + message.content_type)
 
     voice = message.voice
-    # bot.send_message(message.chat.id, voice)
+    bot.send_message(message.chat.id, voice)
 
-    import speech
-    fileInfo = bot.get_file(voice.file_id)
-    audioData = bot.download_file(fileInfo.file_path)
-    bot.send_message(chat_id, speech.getTextFromVoice(audioData))
+    # -----------------------------------------------------------------------
+
+    @bot.message_handler(content_types=['photo'])
+    def get_messages(message):
+        chat_id = message.chat.id
+        bot.send_message(chat_id, "Это " + message.content_type)
+
+        photo = message.photo
+        bot.send_message(message.chat.id, photo)
+
+        # -----------------------------------------------------------------------
+
+        @bot.message_handler(content_types=['video'])
+        def get_messages(message):
+            chat_id = message.chat.id
+            bot.send_message(chat_id, "Это " + message.content_type)
+
+            video = message.video
+            bot.send_message(message.chat.id, video)
+
+# -----------------------------------------------------------------------
+# Получение документов от юзера
+@bot.message_handler(content_types=['document'])
+def get_messages(message):
+    chat_id = message.chat.id
+    mime_type = message.document.mime_type
+    bot.send_message(chat_id, "Это " + message.content_type + " (" + mime_type + ")")
+
+    document = message.document
+    bot.send_message(message.chat.id, document)
+    if message.document.mime_type == "video/mp4":
+        bot.send_message(message.chat.id, "This is a GIF!")
+
 
 # -----------------------------------------------------------------------
 
@@ -122,9 +157,43 @@ def get_name():
         if len(array_name) > 0:
             return array_name[0]
 
+#--------------------------------------------------------
+# def get_wind_direction(deg, advanced_result=False):
+#     l = ['С', 'СВ', 'В', 'ЮВ', 'Ю', 'ЮЗ', 'З', 'СЗ']
+#     l_adv = ['Северный', 'Северо-Восточный', 'Восточный', 'Юго-Восточный', 'Южный', 'Юго-Западный', 'Западный', 'Северо-Западный']
+#     for i in range(0, 8):
+#         step = 45.
+#         min = i * step - 45 / 2.
+#         max = i * step + 45 / 2.
+#         if i == 0 and deg > 360 - 45 / 2.:
+#             deg = deg - 360
+#         if deg >= min and deg <= max:
+#             res = l_adv[i] if advanced_result else l[i]
+#             break
+#     return res
+#
+#
+# def geohash(latitude, longitude, datedow):
+#     '''Compute geohash() using the Munroe algorithm.
+#     >>> geohash(37.421542, -122.085589, b'2005-05-26-10458.68')
+#     37.857713 -122.544543
+#     '''
+#     # https://xkcd.com/426/
+#     h = hashlib.md5(datedow, usedforsecurity=False).hexdigest()
+#     p, q = [('%f' % float.fromhex('0.' + x)) for x in (h[:16], h[16:32])]
+#     print('%d%s %d%s' % (latitude, p[1:], longitude, q[1:]))
+#
+#
+# class OpenWeatherMap():
+#     # для получения своего бесплатного ключа пройдите регистрацию: https://home.openweathermap.org/users/sign_up
+#
+#     def __init__(self):
+#         pass
+#-----------------------------------------------
 
 # -----------------------------------------------------------------------
 bot.polling(none_stop=True, interval=0) # Запускаем бота
 
 print()
 # --------------------------
+
